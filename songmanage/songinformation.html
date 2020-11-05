@@ -140,30 +140,6 @@
             ]]
         });
 
-        //监听锁定按钮
-        form.on('checkbox(lockDemo)', function(obj){
-            //去访问后台进行编辑操作
-            console.log(obj.elem.checked); //是否被选中，true或者false
-            console.log(obj.value); //复选框value值，也可以通过data.elem.value得到
-            //val 指的是status的值 0 或者 1
-            var val  = obj.elem.checked == true ? 1 : 0;
-            var id = obj.value;//选中行id
-            var status = "status";
-            $.ajax({
-                type:"PATCH",
-                url:'../videos/',
-                dataType:'json',
-                contentType:"application/json",
-                data:  JSON.stringify({
-                    "val":val,
-                    "id":id,
-                    "field":status
-                }),
-                success:function(res){
-                    layer.msg(res.msg)
-                }
-            })
-        });
 
         //监听事件
         table.on('toolbar(tabsonginformation)', function(obj){

@@ -135,107 +135,144 @@
 
             }
         })
-        /**
-         * 报表功能
-         */
-        var echartsRecords = echarts.init(document.getElementById('echarts-records'), 'walden');
-        var optionRecords = {
-            tooltip: {
-                trigger: 'axis'
-            },
-            legend: {
-                data: ['歌曲数量', '歌手数量', '专辑数量', '用户数量']
-            },
-            grid: {
-                left: '3%',
-                right: '4%',
-                bottom: '3%',
-                containLabel: true
-            },
-            toolbox: {
-                feature: {
-                    saveAsImage: {}
-                }
-            },
-            xAxis: {
-                type: 'category',
-                boundaryGap: false,
-                data: ['1月', '2月', '3月', '4月', '5月', '6月', '7月','8月', '9月', '10月', '11月', '12月']
-            },
-            yAxis: {
-                type: 'value'
-            },
-            series: [
-                {
-                    name: '歌曲数量',
-                    type: 'line',
-                    data: [120, 132, 101, 134, 90, 230, 210]
-                },
-                {
-                    name: '歌手数量',
-                    type: 'line',
-                    data: [220, 182, 191, 234, 290, 330, 310]
-                },
-                {
-                    name: '专辑数量',
-                    type: 'line',
-                    data: [150, 232, 201, 154, 190, 330, 410]
-                },
-                {
-                    name: '用户数量',
-                    type: 'line',
-                    data: [320, 332, 301, 334, 390, 330, 320]
-                },
-            ]
-        };
-        echartsRecords.setOption(optionRecords);
 
-        /**
-         * 玫瑰图表
-         */
-        var echartsPies = echarts.init(document.getElementById('echarts-pies'), 'walden');
-        var optionPies = {
-            title: {
-                text: '男女比列',
-                left: 'center'
-            },
-            tooltip: {
-                trigger: 'item',
-                formatter: '{a} <br/>{b} : {c} ({d}%)'
-            },
-            legend: {
-                orient: 'vertical',
-                left: 'left',
-                data: ['男', '女', '未知']
-            },
-            series: [
-                {
-                    name: '访问来源',
-                    type: 'pie',
-                    radius: '55%',
-                    center: ['50%', '60%'],
-                    roseType: 'radius',
-                    data: [
-                        {value: 335, name: '男'},
-                        {value: 310, name: '女'},
-                        {value: 234, name: '未知'},
-                    ],
-                    emphasis: {
-                        itemStyle: {
-                            shadowBlur: 10,
-                            shadowOffsetX: 0,
-                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+        $.ajax({
+            type:'GET',
+            url: 'http://localhost:5176/artist/countByMonth',
+            dataType:'JSON',
+            contentType:"application/json",
+            data:"",
+            success:function(obj){
+                layer.msg(obj.msg);
+                var albumCounts=[],
+                    trackCounts =[],
+                    userCounts=[];
+
+                for(var i=0;i<12;i++){
+                    albumCounts.push(obj.data[i].albumCounts);
+                    trackCounts.push(obj.data[i].trackCounts);
+                    userCounts.push(obj.data[i].userCounts);
+                    console.log(obj.data[i]);
+                }
+                /**
+                 * 报表功能
+                 */
+                var echartsRecords = echarts.init(document.getElementById('echarts-records'), 'walden');
+                var optionRecords = {
+                    tooltip: {
+                        trigger: 'axis'
+                    },
+                    legend: {
+                        data: ['歌曲数量', '专辑数量', '用户数量']
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    toolbox: {
+                        feature: {
+                            saveAsImage: {}
                         }
-                    }
-                }
-            ]
-        };
-        echartsPies.setOption(optionPies);
+                    },
+                    xAxis: {
+                        type: 'category',
+                        boundaryGap: false,
+                        data: ['1月', '2月', '3月', '4月', '5月', '6月', '7月','8月', '9月', '10月', '11月', '12月']
+                    },
+                    yAxis: {
+                        type: 'value'
+                    },
+                    series: [
+                        {
+                            name: '歌曲数量',
+                            type: 'line',
+                            data: trackCounts
+                        },
 
-        // echarts 窗口缩放自适应
-        window.onresize = function () {
-            echartsRecords.resize();
-        }
+                        {
+                            name: '专辑数量',
+                            type: 'line',
+                            data: albumCounts
+                        },
+                        {
+                            name: '用户数量',
+                            type: 'line',
+                            data: userCounts
+                        },
+                    ]
+                };
+                echartsRecords.setOption(optionRecords);
+
+
+            }
+        });
+
+        $.ajax({
+            type:'GET',
+            url: 'http://localhost:5176/artist/countBySex',
+            dataType:'JSON',
+            contentType:"application/json",
+            data:"",
+            success:function(obj1){
+                layer.msg(obj1.msg);
+
+                var female=obj1.data.nanCounts;
+                var male = obj1.data.nvCounts;
+
+
+                /**
+                 * 玫瑰图表
+                 */
+                var echartsPies = echarts.init(document.getElementById('echarts-pies'), 'walden');
+                var optionPies = {
+                    title: {
+                        text: '男女比列',
+                        left: 'center'
+                    },
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: '{a} <br/>{b} : {c} ({d}%)'
+                    },
+                    legend: {
+                        orient: 'vertical',
+                        left: 'left',
+                        data: ['男', '女']
+                    },
+                    series: [
+                        {
+                            name: '访问来源',
+                            type: 'pie',
+                            radius: '55%',
+                            center: ['50%', '60%'],
+                            roseType: 'radius',
+                            data: [
+                                {value: male, name: '男'},
+                                {value: female, name: '女'}
+                            ],
+                            emphasis: {
+                                itemStyle: {
+                                    shadowBlur: 10,
+                                    shadowOffsetX: 0,
+                                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                                }
+                            }
+                        }
+                    ]
+                };
+                echartsPies.setOption(optionPies);
+
+                /*// echarts 窗口缩放自适应
+                window.onresize = function () {
+                    echartsRecords.resize();
+                }*/
+
+            }
+        })
+
+
+
 
     });
 

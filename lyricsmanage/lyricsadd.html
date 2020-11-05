@@ -11,7 +11,7 @@
         <div class="layui-inline">
             <label class="layui-form-label">歌曲编号</label>
             <div class="layui-input-block" style="width: 190px">
-                <select name="trackId" id="trackId" lay-verify="trackId">
+                <select name="trackId" id="trackId" lay-filter="trackId">
                     <option value="">请选择歌曲编号</option>
                 </select>
             </div>
@@ -19,7 +19,7 @@
         <div class="layui-inline">
             <label class="layui-form-label">歌曲名称</label>
             <div class="layui-input-block" style="width: 200px;">
-                <select name="trackName" id="trackName" lay-verify="trackName">
+                <select name="trackName" id="trackName" lay-filter="trackName">
                     <option value="">请选择歌曲</option>
                 </select>
             </div>
@@ -28,13 +28,13 @@
     <div class="layui-form-item">
         <label class="layui-form-label">歌词文件</label>
         <div class="layui-input-inline">
-            <input name="avatar" lay-verify="required" id="LAY_avatarSrc" placeholder="图片地址" value="http://cdn.layui.com/avatar/168.jpg" class="layui-input">
+            <input name="lyrics" lay-verify="required" id="lyrics" placeholder="图片地址" class="layui-input">
         </div>
         <div class="layui-input-inline layui-btn-container" style="width: auto;">
-            <button type="button" class="layui-btn layui-btn-primary" id="LAY_avatarUpload">
+            <button type="button" class="layui-btn layui-btn-primary" id="shangchuan1">
                 <i class="layui-icon"></i>上传文件
-            </button><input class="layui-upload-file" type="file" accept="" name="file">
-            <button class="layui-btn layui-btn-primary" layadmin-event="avartatPreview">查看图片</button>
+            </button>
+            <input class="layui-upload-file" type="file" accept="" name="file">
         </div>
     </div>
     <div class="layui-form-item">
@@ -47,20 +47,72 @@
 
 <script src="../layui/layui.js" type="text/javascript" charset="utf-8"></script>
 <script type="text/javascript">
-    layui.use(['form','jquery'],function(){
+    layui.use(['form','jquery','upload'],function(){
         var form = layui.form;
         var $ = layui.jquery;
+        var upload = layui.upload;
         form.render();
         var s = parent.ss;
+        var imgurl = null;//图片
+        form.render();
+
+        //普通图片上传
+        var uploadInst = upload.render({
+            elem:"#shangchuan1"
+            ,url:'http://localhost:5176/image/upload2'
+            ,method:'POST'
+            ,accept:'file'
+            ,size:50000
+            ,before:function(obj){
+                obj.preview(function (index,file,result) {
+                    $('#lyrics').attr('src',result)
+
+                });
+            }
+
+            ,done:function (res) {
+                //如果上传失败
+                if(res.code > 0){
+                    return layer.msg('上传失败');
+                }
+                //上传成功
+                var demoText = $('#demoText');
+                demoText.html('<span style="clolor:#4cae4c;">上传成功</span>');
+
+                /*res.data.src获取后台传过来的图片的url，之后给表单的隐藏图片输入框赋值即可*/
+                var fileupload = $('#lyrics');
+                fileupload.attr('value',res.data.src);
+                console.log(fileupload.attr('value'));
+                var imgurls=[];
+                imgurls=fileupload.attr('value').toString().split("\\");
+                imgurl=imgurls[6]+"/"+imgurls[7]+"/"+imgurls[8];//获取xx.jpg,需要提交到后台的数据
+                console.log(imgurl);
+                fileupload.attr('value',imgurl);
+            }
+            ,error:function () {
+                //演示失败状态，并实现重传
+                var demoText = $('#demoText');
+                demoText.html('<span color: #FF5722;></span><a class="layui-btn layui-btn-xs demo-reload">重试</a>')
+                demoText.find('.demo-reload').on('click',function () {
+                    uploadInst.upload();
+
+                });
+            }
+        });
+
 
         //级联查询
         $.ajax({
-            type:"get",
-            url:"../videos/like",
+            type:"GET",
+            url: 'http://localhost:5176/track/select1',
             dataType:"json",
             data:{},
             success:function(res){
-                var a=["1","2","3","4","5"]
+                var a=[];
+                for(var i=0;i<=res.data.length;i++){
+                    a.push(res.data[i]);
+                    console.log("!!"+res.data[i]);
+                }
                 //index表示素组索引，val表示当前索引对应的值
                 $.each(a,function(index,val){
                     console.log(val)
@@ -72,15 +124,18 @@
 
         form.on('select(trackId)', function(data){
             console.log(data.value); //得到被选中的值
+            var trackId=data.value;
             $.ajax({
-                type:"get",
-                url:"../videos/like",
+                type:"DELETE",
+                url: 'http://localhost:5176/track/select2',
                 dataType:"json",
-                data:{
-                    "value":data.value
-                },
+                contentType: "application/json",
+                data: trackId,
+
                 success:function(res){
-                    var a=["6","7","8","9","10"]
+                    var a=[];
+                        a.push(res.data);
+
                     //index表示素组索引，val表示当前索引对应的值
                     $("#trackName").empty()
                     $.each(a,function(index,val){
@@ -94,27 +149,21 @@
 
         });
 
-        form.on('submit(btnSubmitAddOutDrug)', function(data){
+        form.on('submit(btnSubmitAddLyrics)', function(data){
             if(form.verify()){
                 $.ajax({
-                    url:'http://localhost:8080/outlink/addoutDrug',
-                    type:'POST',
+                    url:'http://localhost:5176/track/update',
+                    type:'PUT',
                     dataType:'JSON',
-                    data:
-                    data.field,
+                    data:data.field,
+                    success:function (obj) {
+                        var index = parent.layer.getFrameIndex(window.name);//获取当前iframe的索引
+                        parent.layer.close(index);//关闭添加弹窗
+                        parent.table.reload('tabsonginformation');
 
-                    success:function(obj){
-                        debugger;
-                        var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
-                        parent.layer.close(index); //再执行关闭
-                        parent.table.reload('taboutStorage');
-                        parent.myalert('新增成功啦');
                     }
-                });
-                errors:function f() {
-                    parent.myalert('新增失败了')
-                }
 
+                });
                 return false;
             }
 

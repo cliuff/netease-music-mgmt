@@ -5,67 +5,47 @@
                 <div class="layui-card-header">设置我的资料</div>
                 <div class="layui-card-body" pad15="">
 
-                    <form class="layui-form" action="" lay-filter="">
+                    <form class="layui-form" action="" lay-filter="form1">
+
                         <div class="layui-form-item">
-                            <label class="layui-form-label">我的角色</label>
+                            <label class="layui-form-label">账号</label>
                             <div class="layui-input-inline">
-                                <select name="role" lay-verify="">
-                                    <option value="1" selected="">超级管理员</option>
-                                    <option value="2" disabled="">普通管理员</option>
-                                    <option value="3" disabled="">审核员</option>
-                                    <option value="4" disabled="">编辑人员</option>
-                                </select><div class="layui-unselect layui-form-select"><div class="layui-select-title"><input type="text" placeholder="请选择" value="超级管理员" readonly="" class="layui-input layui-unselect"><i class="layui-edge"></i></div><dl class="layui-anim layui-anim-upbit"><dd lay-value="1" class="layui-this">超级管理员</dd><dd lay-value="2" class=" layui-disabled">普通管理员</dd><dd lay-value="3" class=" layui-disabled">审核员</dd><dd lay-value="4" class=" layui-disabled">编辑人员</dd></dl></div>
-                            </div>
-                            <div class="layui-form-mid layui-word-aux">当前角色不可更改为其它角色</div>
-                        </div>
-                        <div class="layui-form-item">
-                            <label class="layui-form-label">用户名</label>
-                            <div class="layui-input-inline">
-                                <input type="text" name="username" value="xianxin" readonly="" class="layui-input">
+                                <input type="text" name="adminId"  readonly="" class="layui-input">
                             </div>
                             <div class="layui-form-mid layui-word-aux">不可修改。一般用于后台登入名</div>
                         </div>
                         <div class="layui-form-item">
                             <label class="layui-form-label">昵称</label>
                             <div class="layui-input-inline">
-                                <input type="text" name="nickname" value="贤心" lay-verify="nickname" autocomplete="off" placeholder="请输入昵称" class="layui-input">
+                                <input type="text" name="adminName"  lay-verify="adminName" autocomplete="off" placeholder="请输入昵称" class="layui-input">
                             </div>
                         </div>
                         <div class="layui-form-item">
-                            <label class="layui-form-label">性别</label>
-                            <div class="layui-input-block">
-                                <input type="radio" name="sex" value="男" title="男" checked="">
-                                <input type="radio" name="sex" value="女" title="女">
-                            </div>
-                        </div>
-                        <div class="layui-form-item">
-                            <label class="layui-form-label">头像</label>
+                            <label class="layui-form-label">密码</label>
                             <div class="layui-input-inline">
-                                <input name="avatar" lay-verify="required" id="LAY_avatarSrc" placeholder="图片地址" value="http://cdn.layui.com/avatar/168.jpg" class="layui-input">
+                                <input type="password" name="password" value="" lay-verify="password" autocomplete="off" class="layui-input">
                             </div>
-                            <div class="layui-input-inline layui-btn-container" style="width: auto;">
-                                <button type="button" class="layui-btn layui-btn-primary" id="LAY_avatarUpload">
-                                    <i class="layui-icon"></i>上传图片
-                                </button><input class="layui-upload-file" type="file" accept="" name="file">
-                                <button class="layui-btn layui-btn-primary" layadmin-event="avartatPreview">查看图片</button>
+                        </div>
+                        <input type="hidden" name="image" class="image">
+                        <div class="layui-form-item">
+                            <div style="display: flex;flex-direction: row;margin-right: 20px">
+                                <label class="layui-form-label ">头像</label>
+
+                                <div class="layui-upload" style="display: flex;flex-direction: row;align-items: center">
+                                    <div class="layui-upload-list">
+                                        <img class="layui-upload-img" id="image" name="furPicture" style="width: 100px;height: 100px;">
+                                        <p id="demoText"></p>
+                                    </div>
+                                    <button type="button" class="layui-btn layui-bin-xs" id="test1" style="width: 80px;height: 30px;background-color: #00F7DE;margin-left: 5px;text-align: center;padding: 0px 10px">上传图片</button>
+                                </div>
+
                             </div>
                         </div>
                         <div class="layui-form-item">
-                            <label class="layui-form-label">手机</label>
+                            <label class="layui-form-label">注册时间</label>
                             <div class="layui-input-inline">
-                                <input type="text" name="cellphone" value="" lay-verify="phone" autocomplete="off" class="layui-input">
-                            </div>
-                        </div>
-                        <div class="layui-form-item">
-                            <label class="layui-form-label">邮箱</label>
-                            <div class="layui-input-inline">
-                                <input type="text" name="email" value="" lay-verify="email" autocomplete="off" class="layui-input">
-                            </div>
-                        </div>
-                        <div class="layui-form-item layui-form-text">
-                            <label class="layui-form-label">备注</label>
-                            <div class="layui-input-block">
-                                <textarea name="remarks" placeholder="请输入内容" class="layui-textarea"></textarea>
+                                <input type="text" name="time" value=""
+                                       readonly="" lay-verify="time" autocomplete="off" class="layui-input">
                             </div>
                         </div>
                         <div class="layui-form-item">
@@ -82,41 +62,110 @@
     </div>
 </div>
 <script>
-    layui.use(['form', 'layedit', 'laydate'], function(){
-        var form = layui.form
-            ,layer = layui.layer
-            ,layedit = layui.layedit
-            ,laydate = layui.laydate;
+    layui.use(['upload','jquery','form'],function () {
+        var $ = layui.jquery;
+        var upload = layui.upload;
+        var form = layui.form;
+        var imgurl = null;//图片
+        form.render();
+        var adminId = window.sessionStorage.getItem("adminId");
 
-        //创建一个编辑器
-        var editIndex = layedit.build('LAY_demo_editor');
+        $.ajax({
+            url:'http://localhost:5176/admin/infoById',
+            type:'GET',
+            dataType:'JSON',
+            data:{
+                adminId:adminId
+            },
+            success:function (obj) {
+              /*  var index = parent.layer.getFrameIndex(window.name);//获取当前iframe的索引
+                parent.layer.close(index);//关闭添加弹窗
+                parent.table.reload('tabsonginformation');*/
 
-        //监听提交
-        form.on('submit(demo1)', function(data){
-            layer.alert(JSON.stringify(data.field), {
-                title: '最终的提交信息'
-            })
-            return false;
+                form.val('form1',{
+                    "adminId":obj.data.adminId,
+                    "adminName":obj.data.adminName,
+                    "password":obj.data.password,
+                    "time":obj.data.time
+
+                });
+
+                $('#image').attr('src','media.images/1.jpg');
+
+            }
+
+        });
+        //普通图片上传
+      /*$('#image').attr('src','http://localhost:5176/'+obj.data.image);*/
+        var uploadInst = upload.render({
+            elem:"#test1"
+            ,url:'http://localhost:5176/image/upload'
+            ,method:'POST'
+            ,accept:'images'
+            ,size:50000
+            ,before:function(obj){
+                obj.preview(function (index,file,result) {
+                    $('#demo1').attr('src',result)
+
+                });
+            }
+
+            ,done:function (res) {
+                //如果上传失败
+                if(res.code > 0){
+                    return layer.msg('上传失败');
+                }
+                //上传成功
+                var demoText = $('#demoText');
+                demoText.html('<span style="clolor:#4cae4c;">上传成功</span>');
+
+                /*res.data.src获取后台传过来的图片的url，之后给表单的隐藏图片输入框赋值即可*/
+                var fileupload = $('.image');
+                fileupload.attr('value',res.data.src);
+                console.log(fileupload.attr('value'));
+                var imgurls=[];
+                imgurls=fileupload.attr('value').toString().split("\\");
+                imgurl=imgurls[6]+"/"+imgurls[7]+"/"+imgurls[8];//获取xx.jpg,需要提交到后台的数据
+                fileupload.attr('value',imgurl);
+
+            }
+            ,error:function () {
+                //演示失败状态，并实现重传
+                var demoText = $('#demoText');
+                demoText.html('<span color: #FF5722;></span><a class="layui-btn layui-btn-xs demo-reload">重试</a>')
+                demoText.find('.demo-reload').on('click',function () {
+                    uploadInst.upload();
+
+                });
+            }
         });
 
-        //表单赋值
-        layui.$('#LAY-component-form-setval').on('click', function(){
-            form.val('example', {
-                "username": "贤心" // "name": "value"
-                ,"password": "123456"
-                ,"interest": 1
-                ,"like[write]": true //复选框选中状态
-                ,"close": true //开关状态
-                ,"sex": "女"
-                ,"desc": "我爱 layui"
-            });
+        form.render()
+        // 赋值
+
+        //触发事件
+        form.on('submit(setmyinfo)',function (data) {
+            /*  console.log("你好");
+              console.log(data.field);*/
+            if(form.verify()){
+                $.ajax({
+                    url:'http://localhost:5176/admin/',
+                    type:'PUT',
+                    dataType:'JSON',
+                    data:data.field,
+                    success:function (obj) {
+                        var index = parent.layer.getFrameIndex(window.name);//获取当前iframe的索引
+
+
+                    }
+
+                });
+                return false;
+            }
+
         });
 
-        //表单取值
-        layui.$('#LAY-component-form-getval').on('click', function(){
-            var data = form.val('example');
-            alert(JSON.stringify(data));
-        });
+
 
     });
 </script>

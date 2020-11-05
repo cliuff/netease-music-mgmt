@@ -17,16 +17,25 @@
         <!--当前用户信息-->
         <ul class="layui-nav layui-layout-right">
             <li class="layui-nav-item">
-                <a href="javascript:;">
-                    <img src="http://t.cn/RCzsdCq" class="layui-nav-img">
-                    贤心
+                <a href="javascript:" >
+
+
+
+                    <table>
+                        <td>
+                            <img src="media.images/1.jpg" class="layui-nav-img">
+                        </td>
+                        <td id="head">
+                            管理员123
+                        </td>
+                    </table>
                 </a>
                 <dl class="layui-nav-child">
                     <dd> <a class="crm-menu" crmurl="neteasemanage/managerinformation.html" href="javascript:;">基本资料</a></dd>
                     <dd><a href="">安全设置</a></dd>
                 </dl>
             </li>
-            <li class="layui-nav-item"><a href="">退了</a></li>
+            <li class="layui-nav-item"><a href="javascript:void(0)" id="logout">退了</a></li>
         </ul>
     </div>
 
@@ -42,12 +51,6 @@
                 </li>
                 <li class="layui-nav-item layui-nav-itemed">
                     <a class="crm-menu" crmurl="lyricsmanage/lyricsinformation.html" href="javascript:;">歌词管理</a>
-                </li>
-                <li class="layui-nav-item layui-nav-itemed">
-                    <a class="crm-menu" crmurl="neteasemanage/albummanage.html" href="javascript:;">专辑管理</a>
-                </li>
-                <li class="layui-nav-item layui-nav-itemed">
-                    <a class="crm-menu" crmurl="neteasemanage/commentmanage.html" href="javascript:;">评论管理</a>
                 </li>
                 <li class="layui-nav-item">
                     <a href="javascript:;">系统设置</a>
@@ -78,12 +81,20 @@
         var element = layui.element;
         var $ = layui.jquery;
 
-        var staffName = window.sessionStorage.getItem("staffName");
-        if(staffName!=null){
-            $("#head").html(staffName);
+        var adminId = window.sessionStorage.getItem("adminId");
+        if(adminId!=null){
+            $("#head").html(adminId);
         }
+        $("#logout").on('click',function () {
 
-        $("#crm-content").load(".neteasemanage/home.html");
+            layer.confirm('确定要退出系统吗？',function () {
+                window.sessionStorage.clear();
+                window.location.replace('login1.html');
+
+            });
+        });
+
+        $("#crm-content").load("neteasemanage/home.html");
         //给菜单添加单击事件
         $('.crm-menu').click(function () {
             //jQuery的ajax异步请求，第一个参数是请求的页面；
