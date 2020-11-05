@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="../layui/css/layui.css"/>
+</head>
+<body style="padding: 10px;">
+<form class="layui-form" lay-filter='formEditSongInfomation' action="" >
+    <input type="hidden" name="trackId"  />
+
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">歌曲名称</label>
+            <div class="layui-input-inline">
+                <input type="text"  name="trackName" lay-verify="required" autocomplete="off" placeholder="请输入歌曲名称"  class="layui-input">
+            </div>
+        </div>
+        <div class="layui-inline">
+            <label class="layui-form-label">地区</label>
+            <div class="layui-input-block" style="width: 290px;">
+                <select name="region" lay-verify="required">
+                    <option value=""></option>
+                    <option value="大陆">大陆</option>
+                    <option value="欧美">欧美</option>
+                </select>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">类别</label>
+            <div class="layui-input-block" style="width: 190px">
+                <select name="genre" lay-verify="required">
+                    <option value=""></option>
+                    <option value="青霉素类">青霉素类</option>
+                    <option value="大环内酯类">大环内酯类</option>
+                    <option value="酰胺醇类">酰胺醇类</option>
+                    <option value="四环素类">四环素类</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <input type="hidden" name="cover" class="image">
+    <div class="layui-form-item">
+        <div style="display: flex;flex-direction: row;margin-right: 20px">
+            <label class="layui-form-label ">封面</label>
+
+            <div class="layui-upload" style="display: flex;flex-direction: row;align-items: center">
+                <div class="layui-upload-list">
+                    <img class="layui-upload-img" id="demo1" name="furPicture" style="width: 100px;height: 100px;">
+                    <p id="demoText"></p>
+                </div>
+                <button type="button" class="layui-btn layui-bin-xs" id="shangchuan1" style="width: 80px;height: 30px;background-color: #2D93CA;margin-left: 5px;margin-bottom:0px;text-align: center;padding: 0px 10px">上传图片</button>
+            </div>
+
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">歌曲描述</label>
+            <div class="layui-input-inline" style="margin-left: -4px;width: 630px">
+                <textarea type="text" name="trackDesc" id="trackDesc" lay-verify="required" autocomplete="off" placeholder="请输入歌曲描述" class="layui-textarea"></textarea>
+            </div>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button type="submit" class="layui-btn" lay-submit="" lay-filter="btnSubmitEditSong">立即提交</button>
+            <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+        </div>
+    </div>
+</form>
+
+<script src="../layui/layui.js" type="text/javascript" charset="utf-8"></script>
+<script>
+    layui.use('laydate',function () {
+        var laydate = layui.laydate;
+
+        laydate.render({
+            elem: '#manufactureDate' //指定元素
+        });
+
+    });
+</script>
+
+<script>
+    layui.use('laydate',function () {
+        var laydate = layui.laydate;
+
+        laydate.render({
+            elem: '#time' //指定元素
+        });
+
+    });
+</script>
+<script type="text/javascript">
+    layui.use(['upload','jquery','form'],function () {
+        var $ = layui.jquery;
+        var upload = layui.upload;
+        var form = layui.form;
+        var imgurl = null;//图片
+        form.render();
+
+        //普通图片上传
+        $('#demo1').attr('src','http://localhost:5176/'+parent.row.cover);
+        console.log("111111"+parent.row.cover)
+        var uploadInst = upload.render({
+            elem:"#shangchuan1"
+            ,url:'http://localhost:5176/image/upload'
+            ,method:'POST'
+            ,accept:'images'
+            ,size:50000
+            ,before:function(obj){
+                obj.preview(function (index,file,result) {
+                    $('#demo1').attr('src',result)
+
+                });
+            }
+
+            ,done:function (res) {
+                //如果上传失败
+                if(res.code > 0){
+                    return layer.msg('上传失败');
+                }
+                //上传成功
+                var demoText = $('#demoText');
+                demoText.html('<span style="clolor:#4cae4c;">上传成功</span>');
+
+                /*res.data.src获取后台传过来的图片的url，之后给表单的隐藏图片输入框赋值即可*/
+                var fileupload = $('.image');
+                fileupload.attr('value',res.data.src);
+                console.log(fileupload.attr('value'));
+                var imgurls=[];
+                imgurls=fileupload.attr('value').toString().split("\\");
+                imgurl=imgurls[6]+"/"+imgurls[7]+"/"+imgurls[8];//获取xx.jpg,需要提交到后台的数据
+                console.log(imgurl);
+                fileupload.attr('value',imgurl);
+            }
+            ,error:function () {
+                //演示失败状态，并实现重传
+                var demoText = $('#demoText');
+                demoText.html('<span color: #FF5722;></span><a class="layui-btn layui-btn-xs demo-reload">重试</a>')
+                demoText.find('.demo-reload').on('click',function () {
+                    uploadInst.upload();
+
+                });
+            }
+        });
+        form.render()
+        // 赋值
+        $('.image').attr('value',parent.row.cover);//上传
+        console.log(parent.row.region+parent.row.genre+parent.row.cover+parent.row.trackDecs)
+        form.val('formEditSongInfomation',{
+            "trackId":parent.row.trackId,
+            "trackName":parent.row.trackName,
+            "region":parent.row.region,
+            "genre":parent.row.genre,
+            "demo1":parent.row.cover,
+            "trackDesc":parent.row.trackDesc,
+
+        })
+        // 取消
+        $('.cancel').click(function(){
+            let index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+            parent.layer.close(index); //再执行关闭
+        })
+
+        //触发事件
+        form.on('submit(btnSubmitEditSong)',function (data) {
+            /*  console.log("你好");
+              console.log(data.field);*/
+            if(form.verify()){
+                $.ajax({
+                    url:'http://localhost:5176/track/',
+                    type:'PUT',
+                    dataType:'JSON',
+                    data:data.field,
+                    success:function (obj) {
+                        var index = parent.layer.getFrameIndex(window.name);//获取当前iframe的索引
+                        parent.layer.close(index);//关闭添加弹窗
+                        parent.table.reload('tabsonginformation');
+
+                    }
+
+                });
+                return false;
+            }
+
+        });
+
+
+
+    });
+</script>
+
+</body>
+</html>

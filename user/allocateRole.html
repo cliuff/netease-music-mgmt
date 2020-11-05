@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<link rel="stylesheet" type="text/css" href="../layui/css/layui.css"/>
+	</head>
+	<body style="padding: 10px;">
+		<form class="layui-form" lay-filter='selectRole' style="width: 90%; margin-top: 20px;">
+			<input type="hidden" name="staffId"  />
+          <!-- <input type="hidden" name="id"/> -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">职位:</label>
+            <div class="layui-input-block">
+				<select name="positionClassify" lay-verify="required" id="positionClassify">
+					<option value=""></option>
+					<option value="仓库管理员">仓库管理员</option>
+					<option value="药剂科主任">药剂科主任</option>
+					<option value="药房组长">药房组长</option>
+					<option value="其它">其它</option>
+				</select>
+            </div>
+        </div>
+		<div class="layui-form-item">
+			<div class="layui-input-block" style="margin-top: 100px;">
+                <button class="layui-btn layui-btn-primary cancel">取消</button>
+			    <button type="submit" class="layui-btn" lay-submit="" lay-filter="btnSubmit">保存</button>
+			</div>
+		</div>
+    </form>
+		  
+	<script src="../layui/layui.js" type="text/javascript" charset="utf-8"></script>
+	<script type="text/javascript">
+		layui.use(['form','jquery'],function(){
+			var form = layui.form
+			var $ = layui.jquery
+		
+            // 请求表单下拉列表数据
+            $.ajax({
+				url:'http://localhost:8080/role/search',
+				type:'get',
+				success:function(obj){
+					for(let i = 0;i < obj.data.length;i++){
+						let dom = $(`<option value="${obj.data[i].id}">${obj.data[i].roleName}</option>`)
+						$('#parentMenu').append(dom);
+					}
+					form.render()	
+				}
+
+			})
+            // 取消
+            $('.cancel').click(function(){
+                let index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+                parent.layer.close(index); //再执行关闭
+            })      
+			
+            // 提交
+			form.render()
+			// 赋值
+			form.val('selectRole',{
+				"staffId":parent.row.staffId,
+			})
+			form.on('submit(btnSubmit)', function(data){
+                // 验证,修改角色
+			    if(form.verify()){
+					$.ajax({
+						url:'http://localhost:8080/staffinfo/update',
+						type:'POST',
+						dataType:'JSON',
+						data:data.field,
+					})
+					let index = parent.layer.getFrameIndex(window.name); 
+					parent.layer.close(index); 
+                    parent.layer.msg("分配成功",{time:1000});
+					parent.table.reload('tabStaffInfo');
+                    // 防止表单跳转
+					return false;
+				}
+				
+			});		
+			
+		})
+	</script>
+	</body>
+</html>

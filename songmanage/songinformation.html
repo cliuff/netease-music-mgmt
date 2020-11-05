@@ -1,0 +1,301 @@
+<div style="background: white">
+    <table id="tabsonginformation" lay-filter="tabsonginformation">
+    </table>
+</div>
+<style type="text/css">
+    .layui-table-cell{
+        text-align: center;
+        height: auto;
+        white-space: normal;/*white-space:normal:元素内容过长，在一行上显示不完时，会从下一行开始*/
+    }
+</style>
+<!-- 表头工具栏 -->
+<script type="text/html" id="barsonginformation">
+    <div style="display: flex;flex-direction: row;">
+        <div class="layui-btn-group" style="display:flex;align-items: center;flex-flow: row">
+            <button type="button" class="layui-btn layui-btn-primary layui-btn-sm" lay-event="addSong">
+                <i class="layui-icon">&#xe654;</i>
+            </button>
+
+            <button type="button" class="layui-btn layui-btn-primary layui-btn-sm" lay-event="headDel">
+                <i class="layui-icon">&#xe640;</i>
+            </button>
+        </div>
+        <div style="display: flex;flex-direction: row;">
+            <label class="layui-form-label" style="width: 90px;padding: 9px">歌曲名称</label>
+            <div class="layui-input-inline" style="width: 150px" >
+                <input type="text" id="trackNames" name="trackNames" autocomplete="off" class="layui-input" placeholder="请输入歌曲名称">
+            </div>
+
+            <label class="layui-form-label" style="width: 90px;padding: 9px;margin-left: 10px">歌手</label>
+            <div class="layui-input-inline" style="width: 150px" >
+                <input type="text" id="artistNames" name="artistNames" autocomplete="off" class="layui-input" placeholder="请输入歌手">
+            </div>
+
+            <div style="padding-top: 2px;margin-left: 20px">
+                <a class="layui-btn  layui-btn-xs search-button" lay-event="search" style="height: 34px;width: 70px;font-size: 15px;text-align: center;transform: none;">搜索</a>
+            </div>
+        </div>
+    </div>
+</script>
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+
+</script>
+<script>
+
+    // 一行数据
+
+    var row = null;
+    var table ;
+
+    layui.use(['table','jquery','form'], function(){
+        var $ = layui.jquery;
+        table = layui.table;
+        form=layui.form;
+
+        table.render({
+            elem: '#tabsonginformation',
+            height: 'full-150',
+            code:'0',
+            url: 'http://localhost:5176/track/', //数据接口
+            page: true,  //开启分页
+            method: "POST",
+            dataType:"json",
+            toolbar:'#barsonginformation',  //添加编辑工具栏按钮
+            // defaultToolbar:[], //去掉默认的工具栏按钮
+            limits:[8,16,24,32],
+            limit:8,
+            cols: [[ //表头
+                {checkbox:true},
+                {
+                    field: 'trackId',
+                    title: '歌曲编号',
+                    sort:true,
+                    width:90
+                },{
+                    field: 'trackName',
+                    title: '歌曲名称',
+                    width:100
+                },{
+                    field: 'artistName',
+                    align: 'center',
+                    title: '歌手',
+                    width:100
+                },{
+                    field: 'albumName',
+                    align: 'center',
+                    title: '专辑名称',
+                    width:100
+                },{
+                    field: 'length',
+                    align: 'center',
+                    title: '时长',
+                    templet:function(res){
+                        var time1=res.length/1000;
+                        var time3=time1%60;
+                        var time2=(time1-time3)/60;
+                        var time4=time2+":"+time3;
+                        return time4
+
+                    },
+                    width:80
+                },{
+                    field: 'cover',
+                    align: 'center',
+                    title: '封面',
+                    width:130,
+                    style:"height:130px",
+                    templet:"#imgtmp"
+                },{
+                    field: 'time',
+                    align: 'center',
+                    title: '发布时间',
+                    width:150
+                },{
+                    field: 'genre',
+                    align: 'center',
+                    title: '类别',
+                    width:90
+                },{
+                    field: 'region',
+                    title: '地区',
+                    align: 'center',
+                    width:90
+                },{
+                    field: 'trackDesc',
+                    title: '歌曲描述',
+                    align: 'center',
+
+                },{
+                    fixed: 'right',
+                    width: 130,
+                    title: '操作',
+                    align: 'center',
+                    toolbar: '#barDemo'
+                }
+
+
+            ]]
+        });
+
+        //监听锁定按钮
+        form.on('checkbox(lockDemo)', function(obj){
+            //去访问后台进行编辑操作
+            console.log(obj.elem.checked); //是否被选中，true或者false
+            console.log(obj.value); //复选框value值，也可以通过data.elem.value得到
+            //val 指的是status的值 0 或者 1
+            var val  = obj.elem.checked == true ? 1 : 0;
+            var id = obj.value;//选中行id
+            var status = "status";
+            $.ajax({
+                type:"PATCH",
+                url:'../videos/',
+                dataType:'json',
+                contentType:"application/json",
+                data:  JSON.stringify({
+                    "val":val,
+                    "id":id,
+                    "field":status
+                }),
+                success:function(res){
+                    layer.msg(res.msg)
+                }
+            })
+        });
+
+        //监听事件
+        table.on('toolbar(tabsonginformation)', function(obj){
+            var checkStatus = table.checkStatus(obj.config.id);
+            switch(obj.event){
+                case 'addSong':
+                    layer.open({
+                        type: 2,
+                        title: '添加新歌曲',
+                        area: ['800px', '600px'],
+                        shade: 0.5,
+                        offset: [
+                            ($(window).height()-500)/2,
+                            ($(window).width()-400)/2
+                        ],
+                        content: 'songmanage/songadd.html'
+                    });
+                    break;
+
+                case 'headDel':
+                    if(checkStatus.data.length<=0){
+                        layer.alert("请选择要删除的行");
+                        return;
+                    }
+                    layer.confirm('确定要删除选中的行吗？',function (index) {
+                        var ids=[];
+                        for(var i=0;i<checkStatus.data.length;i++){
+                            ids.push(checkStatus.data[i].trackId);
+                        }
+                        $.ajax({
+                            type:'DELETE',
+                            url: 'http://localhost:5176/track/delete',
+                            dataType:'JSON',
+                            contentType: "application/json",
+                            data:ids.join(","),
+                            success:function (res) {
+                                layer.msg(res.msg);
+                                table.reload(obj.config.id);
+
+                            }
+                        });
+                        layer.close(index);
+
+                    });
+                    break;
+
+                case 'search':
+                    alert("iiii"+trim($("#trackNames").val()));
+                    table.reload('tabsonginformation',{
+
+                        where:{
+                            artistName:trim($("#artistNames").val()),
+                            trackName:trim($("#trackNames").val()),
+                            // effectiveTime:trim($("#effectiveTime").val())
+                        },
+                        page:{
+                            curr:1  //从第一页开始加载
+                        }
+                    })
+                    break;
+
+            };
+        });
+        table.on('rowDouble(tabsonginformation)', function(obj){
+            data = obj.data;
+            //标注选中样式
+            layer.open({
+                type: 2 //此处以iframe举例
+                ,title: '歌曲的详细信息'
+                ,area: ['800px', '600px']
+                ,shade: 0.5//阴影（0-1之间的数）
+                ,maxmin: true//最大、最小化按钮
+                ,offset: [ //为了演示，随机坐标/
+                    ($(window).height()-520)/2
+                    ,($(window).width()-600)/2
+                ]
+                ,content: 'saleManage/druginformationdetaile.html'
+                // ,yes:function () {
+                //     layer.closeAll();
+                // }
+            });
+        });
+
+        //监听工具条
+        table.on('tool(tabsonginformation)', function(obj){
+            row = obj.data; //获得当前行数据
+            var ids=[];
+                ids.push(obj.data.trackId);
+                console.log(obj.data.trackId+ids[0]);
+            var layEvent = obj.event; //获得 lay-event 对应的值
+            if(layEvent === 'detail'){ //查看
+                //do somehing
+            }
+            else if(layEvent === 'del'){ //删除
+                layer.confirm('确定删除当前行吗？', function(index){
+                    obj.del(); //删除对应行（tr）的DOM结构，并更新缓存
+
+                    layer.close(index);
+                    //向服务端发送删除指令
+                    $.ajax({
+                        type:'DELETE',
+                        url: 'http://localhost:5176/track/delete',
+                        dataType:'JSON',
+                        contentType:"application/json",
+                        data:ids.join(","),
+                        success:function(obj){
+                            layer.msg(obj.msg);
+                            //   删除后回到第一页
+                            table.reload('tabUserInfo')
+                        }
+                    })
+                });
+            }
+            else if(layEvent === 'edit'){ //编辑
+                let indexEdit = layer.open({
+                    type: 2,
+                    title: '修改歌曲信息',
+                    area: ['800px', '600px'],
+                    shade: 0.5, //背景阴影0~1
+                    offset: [ //垂直水平居中
+                        ($(window).height()-450)/2
+                        ,($(window).width()-390)/2
+                    ],
+                    content:['songmanage/songedit.html','no']
+                });
+            }
+
+        });
+
+
+    });
+</script>
+<script type="text/html" id="imgtmp">
+    <img src="http://localhost:5176/{{d.cover}}" style="height: 100px;width: 100px;padding: 0px"><!--d.furPicture对应数据接口返回的字段名-->
+</script>

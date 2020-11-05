@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="../layui/css/layui.css"/>
+</head>
+<body style="padding: 10px;">
+<form class="layui-form" lay-filter='formAddlyrics' action="" >
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">歌曲编号</label>
+            <div class="layui-input-inline">
+                <input type="text"  name="trackId" lay-verify="required" autocomplete="off" placeholder="请输入歌曲名称"  class="layui-input">
+            </div>
+        </div>
+        <div class="layui-inline">
+            <label class="layui-form-label">歌曲名称</label>
+            <div class="layui-input-inline" style="width: 200px">
+                <input type="text" name="trackName" autocomplete="off" placeholder="请输入歌手名字" class="layui-input">
+            </div>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">歌词文件</label>
+        <div class="layui-input-inline">
+            <input name="lyrics" lay-verify="required" id="LAY_avatarSrc" placeholder="图片地址" value="http://cdn.layui.com/avatar/168.jpg" class="layui-input">
+        </div>
+        <div class="layui-input-inline layui-btn-container" style="width: auto;">
+            <button type="button" class="layui-btn layui-btn-primary" id="LAY_avatarUpload">
+                <i class="layui-icon"></i>上传文件
+            </button><input class="layui-upload-file" type="file" accept="" name="file">
+            <button class="layui-btn layui-btn-primary" layadmin-event="avartatPreview">查看图片</button>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-input-block" style="margin-top: 40px;">
+            <button class="layui-btn layui-btn-primary cancel">取消</button>
+            <button type="submit" class="layui-btn" lay-submit="" lay-filter="btnSubmitUpdatelyrics">保存</button>
+        </div>
+    </div>
+</form>
+
+<script src="../layui/layui.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript">
+    layui.use(['form','jquery'],function(){
+        var form = layui.form;
+        var $ = layui.jquery;
+        form.render();
+        var s = parent.ss;
+
+        form.val('formAddlyrics',{
+            "trackId":parent.row.trackId,
+            "trackName":parent.row.trackName,
+            "lyrics":parent.row.lyrics,
+
+        })
+        // 取消
+        $('.cancel').click(function(){
+            let index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+            parent.layer.close(index); //再执行关闭
+        })
+
+        // 提交
+        form.on('submit(btnSubmitUpdatelyrics)', function(data){
+            // 验证
+            if(form.verify()){
+                $.ajax({
+                    url:'http://localhost:8080/staffinfo/update',
+                    type:'POST',
+                    dataType:'JSON',
+                    data:data.field,
+                    success:function(obj){
+                        let index = parent.layer.getFrameIndex(window.name);
+                        parent.layer.close(index);
+                        parent.layer.msg("更新成功",{time:1000});
+                        parent.table.reload('tabStaffInfo');
+                    }
+
+                })
+                // 防止表单跳转
+                return false;
+            }
+
+        });
+
+
+
+    })
+</script>
+</body>
+</html>

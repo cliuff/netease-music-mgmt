@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="../layui/css/layui.css"/>
+</head>
+<body style="padding: 10px;">
+<form class="layui-form" lay-filter='formAddlyricsadd' action="" >
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">歌曲编号</label>
+            <div class="layui-input-block" style="width: 190px">
+                <select name="trackId" id="trackId" lay-verify="trackId">
+                    <option value="">请选择歌曲编号</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-inline">
+            <label class="layui-form-label">歌曲名称</label>
+            <div class="layui-input-block" style="width: 200px;">
+                <select name="trackName" id="trackName" lay-verify="trackName">
+                    <option value="">请选择歌曲</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">歌词文件</label>
+        <div class="layui-input-inline">
+            <input name="avatar" lay-verify="required" id="LAY_avatarSrc" placeholder="图片地址" value="http://cdn.layui.com/avatar/168.jpg" class="layui-input">
+        </div>
+        <div class="layui-input-inline layui-btn-container" style="width: auto;">
+            <button type="button" class="layui-btn layui-btn-primary" id="LAY_avatarUpload">
+                <i class="layui-icon"></i>上传文件
+            </button><input class="layui-upload-file" type="file" accept="" name="file">
+            <button class="layui-btn layui-btn-primary" layadmin-event="avartatPreview">查看图片</button>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button type="submit" class="layui-btn" lay-submit="" lay-filter="btnSubmitAddLyrics">立即提交</button>
+            <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+        </div>
+    </div>
+</form>
+
+<script src="../layui/layui.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript">
+    layui.use(['form','jquery'],function(){
+        var form = layui.form;
+        var $ = layui.jquery;
+        form.render();
+        var s = parent.ss;
+
+        //级联查询
+        $.ajax({
+            type:"get",
+            url:"../videos/like",
+            dataType:"json",
+            data:{},
+            success:function(res){
+                var a=["1","2","3","4","5"]
+                //index表示素组索引，val表示当前索引对应的值
+                $.each(a,function(index,val){
+                    console.log(val)
+                    $("#trackId").append('<option value="'+val+'">'+ val +'</option>')
+                })
+                form.render();
+            }
+        })
+
+        form.on('select(trackId)', function(data){
+            console.log(data.value); //得到被选中的值
+            $.ajax({
+                type:"get",
+                url:"../videos/like",
+                dataType:"json",
+                data:{
+                    "value":data.value
+                },
+                success:function(res){
+                    var a=["6","7","8","9","10"]
+                    //index表示素组索引，val表示当前索引对应的值
+                    $("#trackName").empty()
+                    $.each(a,function(index,val){
+                        console.log(val)
+                        $("#trackName").append('<option value="'+val+'">'+ val +'</option>')
+                    })
+                    form.render();
+                }
+            })
+
+
+        });
+
+        form.on('submit(btnSubmitAddOutDrug)', function(data){
+            if(form.verify()){
+                $.ajax({
+                    url:'http://localhost:8080/outlink/addoutDrug',
+                    type:'POST',
+                    dataType:'JSON',
+                    data:
+                    data.field,
+
+                    success:function(obj){
+                        debugger;
+                        var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+                        parent.layer.close(index); //再执行关闭
+                        parent.table.reload('taboutStorage');
+                        parent.myalert('新增成功啦');
+                    }
+                });
+                errors:function f() {
+                    parent.myalert('新增失败了')
+                }
+
+                return false;
+            }
+
+        });
+
+
+    })
+</script>
+</body>
+</html>
